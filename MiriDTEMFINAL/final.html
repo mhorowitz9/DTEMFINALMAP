@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<!-- Created independently with assistance from AI tools like ChatGPT -->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lincoln Center Interactive Tour</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .instructions {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .random-button {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .random-button:hover {
+      background-color: #0056b3;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, #f9fbe7, #e0f7fa);
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .card p {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 1000;
+    }
+
+    .popup.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      position: relative;
+      text-align: left;
+    }
+
+    .popup-content img, .popup-content video {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .popup-content ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    .popup-content ul li {
+      margin-bottom: 5px;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .bibliography {
+      font-style: italic;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🗺️ Explore Lincoln Center</h1>
+  <p class="instructions">Click on any landmark below to learn more and watch a video or see photos!</p>
+  <button class="random-button" onclick="showRandomInfo()">🎲 Random Landmark</button>
+
+  <!-- Cards Container -->
+  <div class="cards-container"></div>
+
+  <!-- Popup -->
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <span class="close" onclick="hideInfo()">&times;</span>
+      <h2 id="popup-title"></h2>
+      <div id="popup-media-container"></div>
+      <ul id="popup-description"></ul>
+      <div id="popup-bibliography" class="bibliography"></div>
+    </div>
+  </div>
+
+  <script>
+    const landmarks = {
+      fountain: {
+        title: "Revson Fountain",
+        description: [
+          "Installed in 1964 as part of the original Lincoln Center design.",
+          "Famous for its water shows set to music and lights.",
+          "A popular gathering spot in the main plaza."
+        ],
+        image: "images/water.gif",
+        bibliography: 'More Info: Lincoln Center, "Revson Fountain," <a href="https://www.nycgovparks.org/parks/M232/monuments/1326" target="_blank">Lincoln Center</a>'
+      },
+      averyFisher: {
+        title: "David Geffen Hall (formerly Avery Fisher Hall)",
+        description: [
+          "Opened in 1962 as Philharmonic Hall, home of the New York Philharmonic.",
+          "Renamed after David Geffen's donation during its 2015–2022 renovation.",
+          "Now features world-class acoustics and modern design."
+        ],
+        image: "images/violin.gif",
+        bibliography: 'More Info: Lincoln Center, "David Geffen Hall," <a href="https://www.lincolncenter.org/venue/david-geffen-hall" target="_blank">Lincoln Center</a>'
+      },
+      library: {
+        title: "NYPL for the Performing Arts",
+        description: [
+          "Opened in 1965 as part of the Lincoln Center campus.",
+          "Holds archives of theater, music, dance, and film history.",
+          "Open to the public with exhibits, screenings, and research space."
+        ],
+        image: "images/book.gif",
+        bibliography: 'Source: New York Public Library, "Performing Arts Library," <a href="https://www.nypl.org/locations/lpa">NYPL</a>'
+      },
+      metoperahouse: {
+        title: "Metropolitan Opera House",
+        description: [
+          "Opened in 1966, designed by architect Wallace K. Harrison.",
+          "One of the largest opera stages in the world.",
+          "Features iconic Marc Chagall murals in the lobby."
+        ],
+        image: "images/opera.gif",
+        bibliography: 'Source: Metropolitan Opera, "The Metropolitan Opera House," <a href="https://www.metopera.org" target="_blank">Metropolitan Opera</a>'
+      },
+      staircase: {
+        title: "Grand Staircase & Plaza",
+        description: [
+          "Central staircase leads to the main Lincoln Center plaza.",
+          "The Grand Staircase at Lincoln Center occasionally features multilingual welcome signs, greeting visitors in different languages to reflect the global audience it attracts.",
+          "Provides scenic views of the complex, especially at night."
+        ],
+        image: "images/staircase.gif",
+        bibliography: 'Source: Lincoln Center, "Grand Staircase," <a href="https://www.flickr.com/photos/nyclovesnyc/5119645338/" target="_blank">Lincoln Center</a>'
+      }
+    };
+
+    window.onload = function() {
+      const cardsContainer = document.querySelector('.cards-container');
+      Object.keys(landmarks).forEach(key => {
+        const landmark = landmarks[key];
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        const cardImg = document.createElement('img');
+        cardImg.src = landmark.image || "";
+        cardImg.alt = landmark.title;
+
+        const cardTitle = document.createElement('p');
+        cardTitle.textContent = landmark.title;
+
+        card.appendChild(cardImg);
+        card.appendChild(cardTitle);
+        card.addEventListener('click', () => showInfo(key));
+
+        cardsContainer.appendChild(card);
+      });
+    };
+
+    function showInfo(key) {
+      const info = landmarks[key];
+      document.getElementById('popup-title').textContent = info.title;
+
+      const mediaContainer = document.getElementById('popup-media-container');
+      mediaContainer.innerHTML = '';
+      const imgElement = document.createElement('img');
+      imgElement.src = info.image;
+      imgElement.alt = info.title;
+      mediaContainer.appendChild(imgElement);
+
+      const descriptionList = document.getElementById('popup-description');
+      descriptionList.innerHTML = '';
+      info.description.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        descriptionList.appendChild(li);
+      });
+
+      document.getElementById('popup-bibliography').innerHTML = info.bibliography;
+
+      document.getElementById('popup').classList.add('show');
+    }
+
+    function hideInfo() {
+      document.getElementById('popup').classList.remove('show');
+    }
+
+    function showRandomInfo() {
+      const keys = Object.keys(landmarks);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      showInfo(randomKey);
+    }
+  </script>
+</body>
+</html>
